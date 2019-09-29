@@ -6,4 +6,4 @@ class PracticeDrillSerializer(serializers.HyperlinkedModelSerializer):
 
 	class Meta:
 		model = PracticeDrill
-		fields = ('Name', 'skill_level')
+		fields = ('name', 'skill_level')

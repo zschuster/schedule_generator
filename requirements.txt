@@ -4,6 +4,8 @@ Django==2.2.5
 djangorestframework==3.10.3
 docutils==0.15.2
 jmespath==0.9.4
+numpy==1.17.2
+pandas==0.25.1
 PyMySQL==0.9.3
 python-dateutil==2.8.0
 pytz==2019.2

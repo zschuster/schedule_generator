@@ -4,11 +4,9 @@ import boto3
 import pandas as pd
 
 print('Loading function')
-
 s3 = boto3.client('s3')
 
-# hi alyssa
-# adding other documentation
+
 def scan_dynamo_table(table_name='practice_drill'):
     dynamo_resource = boto3.resource('dynamodb')
     drill_table = dynamo_resource.Table(table_name)
@@ -18,7 +16,7 @@ def scan_dynamo_table(table_name='practice_drill'):
 
 
 def lambda_handler(event, context):
-    # print("Received event: " + json.dumps(event, indent=2))
+    print("Received event: " + json.dumps(event, indent=2))
 
     # Get the object from the event and show its content type
     # bucket = event['Records'][0]['s3']['bucket']['name']
@@ -29,8 +27,12 @@ def lambda_handler(event, context):
     #     return response['ContentType']
     # except Exception as e:
     #     print(e)
-    #     print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(key, bucket))
+    #     print('Error getting object {} from bucket {}. Make sure they\
+    #      exist and your bucket is in the same region as this function.'.format(key, bucket))
     #     raise e
-
-    practice_drill_data = scan_dynamo_table()
-    return practice_drill_data
+    #
+    # practice_drill_data = scan_dynamo_table()
+    # return practice_drill_data
+    df = pd.DataFrame({'a': [1, 2, 3], 'b': [6, 7, 8]})
+    to_return = json.dumps(df.a)
+    return to_return

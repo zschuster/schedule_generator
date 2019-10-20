@@ -1,9 +1,0 @@
-{
-    "practiceDrill": {
-        "lambda": {
-            "queryStringParameters": {
-                "skill_level": "beginner"
-            }
-        }
-    }
-}

@@ -33,6 +33,3 @@ def lambda_handler(event, context):
     #
     # practice_drill_data = scan_dynamo_table()
     # return practice_drill_data
-    df = pd.DataFrame({'a': [1, 2, 3], 'b': [6, 7, 8]})
-    to_return = json.dumps(df.a)
-    return to_return

@@ -1,11 +1,4 @@
 service: schedule-generator
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
 
 provider:
   name: aws
@@ -27,24 +20,22 @@ provider:
 # you can add packaging information here
 package:
   include:
-    - lambda/practiceDrill.py
-    - lambda/updatePracticeDrillDynamo.py
+    - lambda/**
   exclude:
     - .idea/**
     - .gitignore
     - LICENSE
     - README.md
-    - lambda/upload_function_dir.py
     - node_modules/**
     - venv/**
 
 functions:
   practiceDrill:
-    handler: lambda.practiceDrill.lambda_handler
+    handler: lambda.practice_drill.lambda_handler
     events:
-      - GET practice-drill
+      - http: GET practice-drill
   updatePracticeDrillDynamo:
-    handler: lambda.updatePracticeDrillDynamo.lambda_handler
+    handler: lambda.update_practice_drill_dynamo.lambda_handler
 
 plugins:
   - serverless-python-requirements

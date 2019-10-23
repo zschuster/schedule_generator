@@ -22,7 +22,7 @@ def replace_decimals(obj):
         return obj
 
 
-def lambda_handler(event, context):
+def get(event, context):
     query_params = event['queryStringParameters']
 
     if query_params['skill_level']:

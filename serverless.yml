@@ -8,18 +8,17 @@ provider:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:DeleteItem
-        - dynamodb:Query
-        - dynamodb:Scan
-        - s3:ListBucket
-        - s3:PutObject
-        - s3:GetObject
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:DeleteItem"
+        - "dynamodb:Query"
+        - "dynamodb:Scan"
+        - "s3:PutObject"
+        - "s3:GetObject"
       Resource:
         - arn:aws:dynamodb:us-east-1:*:table/practice_drill
         - arn:aws:dynamodb:us-east-1:*:table/practice_drill/index/skill_level-index
-        - arn:aws:s3:::practice-pal
+        - arn:aws:s3:::practice-pal/*
   versionFunctions: false
 
 package:

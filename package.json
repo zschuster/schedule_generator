@@ -4,6 +4,7 @@
   "description": "REST API for schedule generator",
   "main": "index.js",
   "dependencies": {
+    "serverless": "^1.55.1",
     "serverless-python-requirements": "^5.0.0"
   },
   "devDependencies": {},

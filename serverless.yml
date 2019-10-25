@@ -19,6 +19,7 @@ provider:
       Resource:
         - arn:aws:dynamodb:us-east-1:*:table/practice_drill
         - arn:aws:dynamodb:us-east-1:*:table/practice_drill/index/skill_level-index
+        - arn:aws:s3:::practice-pal
   versionFunctions: false
 
 package:

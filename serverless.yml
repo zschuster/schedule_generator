@@ -1,0 +1,48 @@
+service: schedule-generator
+
+provider:
+  name: aws
+  runtime: python3.7
+  region: us-east-1
+  apiName: PracticePalSimpleProxy
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:DeleteItem"
+        - "dynamodb:Query"
+        - "dynamodb:Scan"
+        - "s3:PutObject"
+        - "s3:GetObject"
+      Resource:
+        - arn:aws:dynamodb:us-east-1:*:table/practice_drill
+        - arn:aws:dynamodb:us-east-1:*:table/practice_drill/index/skill_level-index
+        - arn:aws:s3:::practice-pal/*
+  versionFunctions: false
+
+package:
+  include:
+    - lambda/**
+  exclude:
+    - .idea/**
+    - .gitignore
+    - LICENSE
+    - README.md
+    - node_modules/**
+    - venv/**
+
+functions:
+  practiceDrillGet:
+    handler: lambda.practice_drill.get
+    events:
+      - http: GET practice-drill
+  updatePracticeDrillDynamo:
+    handler: lambda.update_practice_drill_dynamo.lambda_handler
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux

@@ -23,7 +23,7 @@ provider:
 
 package:
   include:
-    - lambda/**
+    - lambda_functions/**
   exclude:
     - .idea/**
     - .gitignore
@@ -34,11 +34,11 @@ package:
 
 functions:
   practiceDrillGet:
-    handler: lambda.practice_drill.get
+    handler: lambda_functions.practice_drill.get
     events:
       - http: GET practice-drill
   updatePracticeDrillDynamo:
-    handler: lambda.update_practice_drill_dynamo.lambda_handler
+    handler: lambda_functions.update_practice_drill_dynamo.lambda_handler
 
 plugins:
   - serverless-python-requirements

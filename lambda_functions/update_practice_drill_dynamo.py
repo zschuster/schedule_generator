@@ -2,6 +2,7 @@ import json
 import urllib.parse
 import boto3
 import pandas as pd
+import decimal
 from io import StringIO
 from datetime import date
 from lambda_functions.dynamo_utils import scan_dynamo_table
@@ -34,9 +35,20 @@ def pd_left_not_right(left_df, right_df, on):
     return joined
 
 
+def decimalize_dict(dictionary):
+    for key, val in dictionary.items():
+        if isinstance(val, (int, float)):
+            dictionary[key] = decimal.Decimal(val)
+    print(json.dumps({'action': 'decimalize_dict',
+                      'result': 'success'})
+          )
+
+
 def upload_df_dynamo(table, pd_df):
     for index_id in pd_df.index:
-        put_response = table.put_item(Item=pd_df.loc[index_id].to_dict())
+        upload_dict = pd_df.loc[index_id].to_dict()
+        decimalize_dict(upload_dict)
+        put_response = table.put_item(Item=upload_dict)
         print(json.dumps(put_response, indent=4))
 
 
@@ -55,6 +67,9 @@ def del_df_dynamo(table, pd_df, key='drill_id'):
 
 
 def lambda_handler(event, context):
+    print('EVENT:')
+    print(event)
+
     # Get the object from the event and show its content type
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
@@ -79,15 +94,14 @@ def lambda_handler(event, context):
 
     # write updated table to s3
     new_data = pd.DataFrame(scan_dynamo_table())
-    del new_data['drill_id']
+    new_data = new_data.loc[:, join_cols]
     today = date.today().strftime('%Y-%m-%d')
     key_string = 'dynamo_practice_drill_current/practice_drill_{}.csv'.format(today)
     csv_buffer = StringIO()
-    new_data.to_csv(csv_buffer)
+    new_data.to_csv(csv_buffer, index=False)
     s3_resource.Object(bucket, key_string).put(Body=csv_buffer.getvalue())
 
-    print(json.dumps({'status': 'success',
+    print(json.dumps({'status': 'function completed!',
                       'rows_uploaded': str(len(to_upload)),
                       'rows_deleted': str(len(to_delete))})
           )
-    return 'success'

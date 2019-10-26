@@ -2,23 +2,12 @@ import json
 import urllib.parse
 import boto3
 import pandas as pd
+from io import StringIO
+from datetime import date
+from lambda_functions.dynamo_utils import scan_dynamo_table
 
-
-def dynamo_scan_to_df(dict_list):
-    base_dict = {k: [v] for k, v in dict_list[0].items()}
-    keys = base_dict.keys()
-    for i in range(1, len(dict_list)):
-        for key in keys:
-            base_dict[key].append(dict_list[i][key])
-    return base_dict
-
-
-def scan_dynamo_table(table_name='practice_drill'):
-    dynamo_resource = boto3.resource('dynamodb')
-    drill_table = dynamo_resource.Table(table_name)
-
-    response = drill_table.scan()
-    return dynamo_scan_to_df(response['Items'])
+s3 = boto3.client('s3')
+dynamo_table = boto3.resource('dynamodb', region_name='us-east-1').Table('practice_drill')
 
 
 def read_s3_csv(client, bucket, key):
@@ -65,9 +54,6 @@ def del_df_dynamo(table, pd_df, key='drill_id'):
 
 
 def lambda_handler(event, context):
-
-    s3 = boto3.client('s3')
-
     # Get the object from the event and show its content type
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
@@ -89,19 +75,18 @@ def lambda_handler(event, context):
     to_delete = pd_left_not_right(practice_drill_data, input_data, join_cols)
 
     # add and remove rows to dynamo table
-    table = boto3.resource('dynamodb', region_name='us-east-1').Table('practice_drill')
+    upload_df_dynamo(dynamo_table, to_upload)
+    del_df_dynamo(dynamo_table, to_delete)
 
-    upload_df_dynamo(table, to_upload)
-    del_df_dynamo(table, to_delete)
+    # write updated table to s3
+    new_data = pd.DataFrame(scan_dynamo_table())
+    del new_data['drill_id']
+    today = date.today().strftime('%Y-%m-%d')
+    key_string = 'dynamo_practice_drill_current/practice_drill_{}.csv'.format(today)
+    csv_buffer = StringIO()
+    new_data.to_csv(csv_buffer)
+    s3.Object(bucket, key_string).put(body=csv_buffer.getValue())
 
     return json.dumps({'status': 'success',
                        'rows_uploaded': str(len(to_upload)),
                        'rows_deleted': str(len(to_delete))})
-
-
-if __name__ == '__main__':
-    # test event
-    with open('update_test_event.json', 'r') as f:
-        event = json.load(f)
-
-    print(lambda_handler(event, None))

@@ -6,8 +6,9 @@ from io import StringIO
 from datetime import date
 from lambda_functions.dynamo_utils import scan_dynamo_table
 
-s3 = boto3.client('s3')
-dynamo_table = boto3.resource('dynamodb', region_name='us-east-1').Table('practice_drill')
+s3_resource = boto3.resource('s3')
+s3_client = boto3.client('s3')
+dynamo_table = boto3.resource('dynamodb').Table('practice_drill')
 
 
 def read_s3_csv(client, bucket, key):
@@ -57,14 +58,12 @@ def lambda_handler(event, context):
     # Get the object from the event and show its content type
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
-    response = read_s3_csv(s3, bucket, key)
+    response = read_s3_csv(s3_client, bucket, key)
 
     input_data = pd.read_csv(response['Body'])
-    print(input_data.info())
 
     practice_drill_data = scan_dynamo_table()
     practice_drill_data = pd.DataFrame(practice_drill_data)
-    print(practice_drill_data.info())
 
     join_cols = ['description', 'display_name', 'name', 'skill_level']
 
@@ -85,8 +84,10 @@ def lambda_handler(event, context):
     key_string = 'dynamo_practice_drill_current/practice_drill_{}.csv'.format(today)
     csv_buffer = StringIO()
     new_data.to_csv(csv_buffer)
-    s3.Object(bucket, key_string).put(body=csv_buffer.getValue())
+    s3_resource.Object(bucket, key_string).put(Body=csv_buffer.getvalue())
 
-    return json.dumps({'status': 'success',
-                       'rows_uploaded': str(len(to_upload)),
-                       'rows_deleted': str(len(to_delete))})
+    print(json.dumps({'status': 'success',
+                      'rows_uploaded': str(len(to_upload)),
+                      'rows_deleted': str(len(to_delete))})
+          )
+    return 'success'

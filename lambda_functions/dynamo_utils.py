@@ -1,3 +1,6 @@
+import boto3
+
+
 def dynamo_scan_to_df(dict_list):
     base_dict = {k: [v] for k, v in dict_list[0].items()}
     keys = base_dict.keys()

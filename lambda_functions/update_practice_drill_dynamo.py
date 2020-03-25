@@ -79,7 +79,7 @@ def lambda_handler(event, context):
     response = read_s3_csv(s3_client, bucket, key)
 
     input_data = pd.read_csv(response['Body'])
-    input_data['name'] = input_data.display_name.str.title().str.replace('\\s+', '_')
+    input_data['name'] = input_data.display_name.str.lower().str.replace('\\s+', '_')
 
     practice_drill_data = scan_dynamo_table()
     practice_drill_data = pd.DataFrame(practice_drill_data)

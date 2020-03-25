@@ -9,7 +9,7 @@ provider:
     - Effect: "Allow"
       Action:
         - "dynamodb:GetItem"
-        - "dynamodb:PutItem"
+        - "dynamodb:BatchWriteItem"
         - "dynamodb:DeleteItem"
         - "dynamodb:Query"
         - "dynamodb:Scan"

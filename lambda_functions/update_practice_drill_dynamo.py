@@ -45,11 +45,14 @@ def decimalize_dict(dictionary):
 
 
 def upload_df_dynamo(table, pd_df):
-    for index_id in pd_df.index:
-        upload_dict = pd_df.loc[index_id].to_dict()
-        decimalize_dict(upload_dict)
-        put_response = table.put_item(Item=upload_dict)
-        print(json.dumps(put_response, indent=4))
+    upload_dict = pd_df.to_dict(orient='records')
+    for entry in upload_dict:
+        decimalize_dict(entry)
+    with table.batch_writer() as batch:
+        for entry in upload_dict:
+            batch.put_item(Item=entry)
+
+    print(json.dumps({"Result": "Successfully wrote {} rows to table.".format(len(upload_dict))}, indent=4))
 
 
 def del_df_dynamo(table, pd_df, key='drill_id'):
@@ -76,6 +79,7 @@ def lambda_handler(event, context):
     response = read_s3_csv(s3_client, bucket, key)
 
     input_data = pd.read_csv(response['Body'])
+    input_data['name'] = input_data.display_name.str.title().str.replace('\\s+', '_')
 
     practice_drill_data = scan_dynamo_table()
     practice_drill_data = pd.DataFrame(practice_drill_data)
@@ -94,7 +98,7 @@ def lambda_handler(event, context):
 
     # write updated table to s3
     new_data = pd.DataFrame(scan_dynamo_table())
-    new_data = new_data.loc[:, join_cols]
+    new_data = new_data.loc[:, ['description', 'display_name', 'skill_level']]
     today = date.today().strftime('%Y-%m-%d')
     key_string = 'dynamo_practice_drill_current/practice_drill_{}.csv'.format(today)
     csv_buffer = StringIO()

@@ -1,5 +1,6 @@
 import json
 import decimal
+import os
 from boto3 import resource
 from boto3.dynamodb.conditions import Key
 
@@ -26,7 +27,7 @@ def get(event, context):
     query_params = event['queryStringParameters']
 
     if query_params['skill_level']:
-        skill_level = query_params['skill_level']
+        skill_level = query_params['skill_level'].lower()
     else:
         return "Named parameter 'skill_level' not found"
 
@@ -35,12 +36,12 @@ def get(event, context):
         return "No valid entry for 'skill_level' detected"
 
     dynamo_resource = resource('dynamodb')
-    drill_table = dynamo_resource.Table('practice_drill')
+    drill_table = dynamo_resource.Table(os.getenv("TABLE_NAME"))
 
     response = drill_table.query(
         IndexName='skill_level-index',
         Select='ALL_ATTRIBUTES',
-        KeyConditionExpression=Key('skill_level').eq('beginner')
+        KeyConditionExpression=Key('skill_level').eq(skill_level)
     )
 
     # convert any decimal values to float/int

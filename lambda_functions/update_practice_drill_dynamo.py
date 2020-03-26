@@ -3,13 +3,14 @@ import urllib.parse
 import boto3
 import pandas as pd
 import decimal
+import os
 from io import StringIO
 from datetime import date
 from lambda_functions.dynamo_utils import scan_dynamo_table
 
 s3_resource = boto3.resource('s3')
 s3_client = boto3.client('s3')
-dynamo_table = boto3.resource('dynamodb').Table('practice_drill')
+dynamo_table = boto3.resource('dynamodb').Table(os.getenv('TABLE_NAME'))
 
 
 def read_s3_csv(client, bucket, key):

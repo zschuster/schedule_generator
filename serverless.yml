@@ -35,10 +35,15 @@ package:
 functions:
   practiceDrillGet:
     handler: lambda_functions.practice_drill.get
+    environment:
+      TABLE_NAME: practice_drill
     events:
       - http: GET practice-drill
   updatePracticeDrillDynamo:
     handler: lambda_functions.update_practice_drill_dynamo.lambda_handler
+    environment:
+      TABLE_NAME: practice_drill
+
 
 plugins:
   - serverless-python-requirements

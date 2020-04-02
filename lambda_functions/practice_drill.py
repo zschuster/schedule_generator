@@ -24,30 +24,27 @@ def replace_decimals(obj):
 
 
 def get(event, context):
-    query_params = event['queryStringParameters']
+    query_params = event["queryStringParameters"]
 
-    if query_params['skill_level']:
-        skill_level = query_params['skill_level'].lower()
+    if query_params["skill_level"]:
+        skill_level = query_params["skill_level"].lower()
     else:
         return "Named parameter 'skill_level' not found"
 
-    skill_levels = ['beginner', 'intermediate', 'advanced']
+    skill_levels = ["beginner", "intermediate", "advanced"]
     if skill_level not in skill_levels:
         return "No valid entry for 'skill_level' detected"
 
-    dynamo_resource = resource('dynamodb')
+    dynamo_resource = resource("dynamodb")
     drill_table = dynamo_resource.Table(os.getenv("TABLE_NAME"))
 
     response = drill_table.query(
-        IndexName='skill_level-index',
-        Select='ALL_ATTRIBUTES',
-        KeyConditionExpression=Key('skill_level').eq(skill_level)
+        IndexName="skill_level-index",
+        Select="ALL_ATTRIBUTES",
+        KeyConditionExpression=Key("skill_level").eq(skill_level),
     )
 
     # convert any decimal values to float/int
-    body = replace_decimals(response['Items'])
+    body = replace_decimals(response["Items"])
 
-    return {
-        'statusCode': 200,
-        'body': json.dumps(body)
-    }
+    return {"statusCode": 200, "body": json.dumps(body)}
